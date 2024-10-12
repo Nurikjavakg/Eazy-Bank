@@ -28,7 +28,7 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_DB: "loansdb"
+      POSTGRES_DB: "loans"
 
     extends:
       file: common-config.yml
