@@ -74,7 +74,7 @@
                 <version>3.4.3</version>
                 <configuration>
                     <to>
-                        <image>nurik345/${project.artifactId}:s7</image>
+                        <image>nurik345/${project.artifactId}:s9</image>
                     </to>
                     <from>
                         <platforms>

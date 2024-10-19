@@ -1,3 +1,4 @@
+common-compose.yml:
 services:
   network-deploy-service:
     networks:
@@ -30,5 +31,12 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+
+  microservice-eureka-config:
+    extends:
+      service: microservice-configserver-config
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: 1234

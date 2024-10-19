@@ -79,6 +79,15 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -115,7 +124,7 @@
                 <version>3.4.3</version>
                 <configuration>
                     <to>
-                        <image>nurik345/${project.artifactId}:s7</image>
+                        <image>nurik345/${project.artifactId}:s9</image>
                     </to>
                     <from>
                         <platforms>
