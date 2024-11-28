@@ -15,7 +15,6 @@ import com.eazybytes.accounts.service.ICustomersService;
 import com.eazybytes.accounts.service.client.CardsFeignClient;
 import com.eazybytes.accounts.service.client.LoansFeignClient;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +23,27 @@ import org.springframework.stereotype.Service;
 public class CustomerServiceImpl implements ICustomersService {
     private AccountsRepository accountsRepository;
     private CustomerRepository customerRepository;
+
     private CardsFeignClient cardsFeignClient;
     private LoansFeignClient loansFeignClient;
+
+    // Вложенный класс LoansFallback
+    private class LoansFallback implements LoansFeignClient {
+        @Override
+        public ResponseEntity<LoansDto> fetchLoanDetails(String correlationId, String mobileNumber) {
+            // Возвращаем null или сообщение, что кредитов нет
+            return ResponseEntity.ok(new LoansDto()); // Или вернуть null, как вам нужно
+        }
+    }
+
+    // Вложенный класс CardsFallback
+    private class CardsFallback implements CardsFeignClient {
+        @Override
+        public ResponseEntity<CardsDto> fetchCardDetails(String correlationId, String mobileNumber) {
+            // Возвращаем null или сообщение, что карты нет
+            return ResponseEntity.ok(null); // Или вернуть сообщение, что карты отсутствуют
+        }
+    }
 
     @Override
     public CustomerDetailsDto fetchCustomerDetails(String mobileNumber, String correlationId) {
@@ -39,15 +57,31 @@ public class CustomerServiceImpl implements ICustomersService {
         CustomerDetailsDto customerDetailsDto = CustomerMapper.mapToCustomerDetailsDto(customer, new CustomerDetailsDto());
         customerDetailsDto.setAccountsDto(AccountsMapper.mapToAccountsDto(accounts, new AccountsDto()));
 
-        ResponseEntity<LoansDto>loansDtoResponseEntity = loansFeignClient.fetchLoanDetails(correlationId,mobileNumber);
-        if(null!=loansDtoResponseEntity) {
-            customerDetailsDto.setLoansDto(loansDtoResponseEntity.getBody());
+        // Используем LoansFallback, если loansFeignClient не доступен
+        LoansFeignClient loansFallbackClient = new LoansFallback();
+        CardsFeignClient cardsFallbackClient = new CardsFallback();
+
+        try {
+            ResponseEntity<LoansDto> loansDtoResponseEntity = loansFeignClient.fetchLoanDetails(correlationId, mobileNumber);
+            if (loansDtoResponseEntity != null && loansDtoResponseEntity.getStatusCode().is2xxSuccessful()) {
+                customerDetailsDto.setLoansDto(loansDtoResponseEntity.getBody());
+            }
+        } catch (Exception e) {
+            System.err.println("Ошибка при вызове LoansFeignClient: " + e.getMessage());
+            customerDetailsDto.setLoansDto(loansFallbackClient.fetchLoanDetails(correlationId, mobileNumber).getBody());
         }
 
-        ResponseEntity<CardsDto>cardsDtoResponseEntity = cardsFeignClient.fetchCardDetails(correlationId,mobileNumber);
-        if(null!=cardsDtoResponseEntity) {
-            customerDetailsDto.setCardsDto(cardsDtoResponseEntity.getBody());
+        try {
+            ResponseEntity<CardsDto> cardsDtoResponseEntity = cardsFeignClient.fetchCardDetails(correlationId, mobileNumber);
+            if (cardsDtoResponseEntity != null && cardsDtoResponseEntity.getStatusCode().is2xxSuccessful()) {
+                customerDetailsDto.setCardsDto(cardsDtoResponseEntity.getBody());
+            }
+        } catch (Exception e) {
+            System.err.println("Ошибка при вызове CardsFeignClient: " + e.getMessage());
+            customerDetailsDto.setCardsDto(cardsFallbackClient.fetchCardDetails(correlationId, mobileNumber).getBody());
         }
+
+
         return customerDetailsDto;
     }
 }

@@ -13,6 +13,7 @@
         <module name="loans" />
         <module name="accounts" />
         <module name="configserver" />
+        <module name="message" />
         <module name="section2" />
       </profile>
     </annotationProcessing>
@@ -25,6 +26,7 @@
       <module name="eurekaserver" options="-parameters" />
       <module name="gatewayserver" options="-parameters" />
       <module name="loans" options="-parameters" />
+      <module name="message" options="-parameters" />
       <module name="section2" options="-parameters" />
     </option>
   </component>

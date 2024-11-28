@@ -9,7 +9,21 @@ spring:
         locator:
           enabled: false
           lowerCaseServiceId: true
+    httpclient:
+      connect-timeout: 1000     # Таймаут для установки соединения с микросервисом. Если за 1000 миллисекунд (1 секунда) соединение не установлено, запрос прерывается.
+      response-timeout: 10s     # Таймаут для ожидания ответа от микросервиса. Если ответ не получен в течение 2 секунд, запрос прерывается, и возвращается ошибка.
+  data:
+    redis:
+      connect-timeout: 2s
+      host: localhost
+      port: 6379
+      timeout: 1s
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "http://localhost:7080/realms/master/protocol/openid-connect/certs"
 management:
   endpoints:
     web:
@@ -27,12 +41,18 @@ info:
     name: "gatewayserver"
     description: "Eazy Bank Gateway Server Application"
     version: "1.0.0"
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 logging:
   level:
     com:
       eazybytes:
         gatewayserver: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
 
 resilience4j.circuitbreaker:
   configs:
